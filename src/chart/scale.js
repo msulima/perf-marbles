@@ -1,4 +1,20 @@
-export default function scale(points, count) {
+export function getScaledMaxValue(points) {
+    let maxValue = 0;
+
+    points.forEach(point => {
+        maxValue = Math.max(maxValue, point.value);
+    });
+
+    if (maxValue === 0) {
+        return 1;
+    }
+
+    const order = Math.pow(10, Math.floor(Math.log10(maxValue)));
+
+    return Math.ceil(maxValue / order) * order;
+}
+
+export default function scale(points, count, maxValue) {
     if (points.length === 0) {
         return [];
     }
@@ -8,7 +24,7 @@ export default function scale(points, count) {
             timestamp: 0,
         }]
     }
-    const {maxValue, minTimestamp, maxTimestamp} = getStatistics(points);
+    const {minTimestamp, maxTimestamp} = getStatistics(points);
     const averageBreak = (maxTimestamp - minTimestamp) / (points.length - 1);
 
     return points.map(point => {
@@ -20,17 +36,14 @@ export default function scale(points, count) {
 }
 
 function getStatistics(points) {
-    let maxValue = 0;
     let minTimestamp = Infinity;
     let maxTimestamp = 0;
 
     points.forEach(point => {
-        maxValue = Math.max(maxValue, point.value);
         minTimestamp = Math.min(minTimestamp, point.timestamp);
         maxTimestamp = Math.max(maxTimestamp, point.timestamp);
     });
     return {
-        maxValue,
         minTimestamp,
         maxTimestamp,
     };

@@ -1,8 +1,36 @@
 import {expect} from 'chai';
-import scale from '../src/scale';
+import scale, {getScaledMaxValue} from '../../src/chart/scale';
 
 
 describe('Scale', function () {
+
+    it('rounds max to same order of magnitude', function () {
+        // given
+        const points = [{
+            value: 33,
+        }, {
+            value: 166,
+        }];
+
+        // when
+        const scaled = getScaledMaxValue(points);
+
+        // then
+        expect(scaled).to.equal(200);
+    });
+
+    it('rounds max less than 1 to same order of magnitude', function () {
+        // given
+        const points = [{
+            value: 0.045,
+        }];
+
+        // when
+        const scaled = getScaledMaxValue(points);
+
+        // then
+        expect(scaled).to.equal(0.05);
+    });
 
     it('should scale values to [0,1] range', function () {
         // given
@@ -16,12 +44,13 @@ describe('Scale', function () {
             value: 300,
             timestamp: 3,
         }];
+        const maxValue = 400;
 
         // when
-        const scaled = scale(points);
+        const scaled = scale(points, 50, maxValue);
 
         // then
-        expect(scaled.map(x => x.value)).to.deep.equal([1 / 3, 2 / 3, 1]);
+        expect(scaled.map(x => x.value)).to.deep.equal([1 / 4, 1 / 2, 3 / 4]);
     });
 
     it('should zero max value to zero', function () {

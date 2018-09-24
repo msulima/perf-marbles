@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import run from './queue';
-import Chart from "./chart";
+import Chart from "./chart/chart";
 
 class Marbles extends React.Component {
 
