@@ -2,37 +2,52 @@ import React from "react";
 import ReactDOM from "react-dom";
 import run from './queue';
 import Chart from "./chart/chart";
+import NumberInput from './input';
 
 class Marbles extends React.Component {
 
     constructor() {
         super();
         this.state = {
-            lastArrival: 0,
-            queue: [],
-            processor: null,
-            history: [],
-            lastAverages: [],
+            interval: 500,
+            taskSize: 100,
+            queue: {
+                lastArrival: 0,
+                queue: [],
+                processor: null,
+                history: [],
+                lastAverages: [],
+            },
         };
     }
 
     componentDidMount() {
         window.setInterval(() => {
-            this.setState(run(this.state));
+            this.setState({
+                queue: run(this.state.queue, this.state.interval, this.state.taskSize),
+            });
         }, 500);
     }
 
-    render() {
-        let totalLatency = 0;
-        this.state.history.forEach(task => {
-            totalLatency += task.startedAt - task.arrivedAt;
-        });
-        const averageLatency = this.state.lastAverages.length > 0 ? this.state.lastAverages[this.state.lastAverages.length - 1].value : 0;
+    setTaskSize(taskSize) {
+        this.setState({taskSize});
+    }
 
-        console.log("Average latency", averageLatency, "Queue length", this.state.queue.length);
+    setInterval(interval) {
+        this.setState({interval});
+    }
+
+    render() {
+        const lastAverages = this.state.queue.lastAverages;
+        const averageLatency = lastAverages.length > 0 ? lastAverages[lastAverages.length - 1].value : 0;
+        const queueLength = this.state.queue.queue.length;
+
+        console.log("Average latency", averageLatency, "Queue length", queueLength);
         return <div>
-            <Index averageLatency={averageLatency} queueLength={this.state.queue.length}/>
-            <Chart points={this.state.lastAverages}/>
+            <NumberInput label="Interval" value={this.state.interval} onChange={value => this.setInterval(value)}/>
+            <NumberInput label="Task size" value={this.state.taskSize} onChange={value => this.setTaskSize(value)}/>
+            <Index averageLatency={averageLatency} queueLength={queueLength}/>
+            <Chart points={lastAverages}/>
         </div>
     }
 }

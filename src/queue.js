@@ -1,6 +1,3 @@
-let interval = 500;
-let taskSize = 100;
-
 import arrive from './arrivalQueue';
 import process from './processor';
 
@@ -9,9 +6,9 @@ const MAX_HISTORY = 50;
 const start = Date.now();
 const history = [];
 
-export default function run(state) {
+export default function run(state, interval, taskSize) {
     const now = Date.now() - start;
-    const arriveResult = runArrive(state, now);
+    const arriveResult = runArrive(state, now, interval, taskSize);
     const processResult = runProcess(state, arriveResult, now);
 
     processResult.finished.forEach(task => {
@@ -32,16 +29,16 @@ export default function run(state) {
     };
 }
 
-function runArrive(state, now) {
+function runArrive(state, now, interval, taskSize) {
     const {lastArrival, queue} = state;
-    return arrive(getNextArrival, () => taskSize, {
+    return arrive(() => getNextArrival(interval), () => taskSize, {
         lastArrival,
         queue,
     }, now);
 
 }
 
-function getNextArrival() {
+function getNextArrival(interval) {
     return Math.random() * interval;
 }
 
@@ -61,7 +58,7 @@ function getAverage(history) {
         totalLatency += task.startedAt - task.arrivedAt;
     });
 
-    return (history.length > 0 ? totalLatency / history.length : 0).toPrecision(2);
+    return (history.length > 0 ? totalLatency / history.length : 0);
 }
 
 function addInLimit(list, element, limit) {

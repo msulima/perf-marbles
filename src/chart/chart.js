@@ -5,7 +5,7 @@ import {axisLabels} from './axis';
 
 const WIDTH = 1000;
 const HEIGHT = 400;
-const MARGIN_LEFT = 25;
+const MARGIN_LEFT = 50;
 const MARGIN_TOP = 5;
 const MARGIN_RIGHT = 25;
 const MARGIN_BOTTOM = 25;
