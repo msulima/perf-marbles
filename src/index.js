@@ -4,13 +4,14 @@ import run from './queue';
 import format from './format';
 import Chart from "./chart/chart";
 import NumberInput from './input';
+import ArrivalRatePicker from './distribution/ArrivalRatePicker';
 
 class Marbles extends React.Component {
 
     constructor() {
         super();
         this.state = {
-            interval: 500,
+            arrival: ArrivalRatePicker.getInitialState(),
             taskSize: 100,
             queue: {
                 lastArrival: 0,
@@ -20,12 +21,13 @@ class Marbles extends React.Component {
                 lastAverages: [],
             },
         };
+        this.handleChangeDistribution = this.handleChangeDistribution.bind(this);
     }
 
     componentDidMount() {
         window.setInterval(() => {
             this.setState({
-                queue: run(this.state.queue, this.state.interval, this.state.taskSize),
+                queue: run(this.state.queue, this.state.arrival.generator, this.state.taskSize),
             });
         }, 500);
     }
@@ -38,6 +40,12 @@ class Marbles extends React.Component {
         this.setState({interval});
     }
 
+    handleChangeDistribution(distribution) {
+        this.setState({
+            arrival: distribution,
+        });
+    }
+
     render() {
         const lastAverages = this.state.queue.lastAverages;
         const averageLatency = lastAverages.length > 0 ? lastAverages[lastAverages.length - 1].value : 0;
@@ -45,6 +53,7 @@ class Marbles extends React.Component {
 
         console.log("Average latency", averageLatency, "Queue length", queueLength);
         return <div>
+            <ArrivalRatePicker onChangeDistribution={this.handleChangeDistribution}/>
             <NumberInput label="Interval" value={this.state.interval} onChange={value => this.setInterval(value)}/>
             <NumberInput label="Task size" value={this.state.taskSize} onChange={value => this.setTaskSize(value)}/>
             <Index averageLatency={format(averageLatency)} queueLength={queueLength}/>

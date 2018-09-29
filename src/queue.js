@@ -6,9 +6,9 @@ const MAX_HISTORY = 50;
 const start = Date.now();
 const history = [];
 
-export default function run(state, interval, taskSize) {
+export default function run(state, arrivalGenerator, taskSize) {
     const now = Date.now() - start;
-    const arriveResult = runArrive(state, now, interval, taskSize);
+    const arriveResult = runArrive(state, now, arrivalGenerator, taskSize);
     const processResult = runProcess(state, arriveResult, now);
 
     processResult.finished.forEach(task => {
@@ -29,9 +29,10 @@ export default function run(state, interval, taskSize) {
     };
 }
 
-function runArrive(state, now, interval, taskSize) {
+function runArrive(state, now, arrivalGenerator, taskSize) {
     const {lastArrival, queue} = state;
-    return arrive(() => getNextArrival(interval), () => taskSize, {
+    console.log(arrivalGenerator());
+    return arrive(arrivalGenerator, () => taskSize, {
         lastArrival,
         queue,
     }, now);
