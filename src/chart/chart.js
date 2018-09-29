@@ -38,21 +38,8 @@ function draw(canvas, points) {
     const axisYLabels = axisLabels(0, maxValue, 5);
 
     drawYAxis(ctx, axisYLabels);
-    scale(points, 50, maxValue).forEach(point => {
-        drawPoint(ctx, point);
-    });
-}
-
-function drawPoint(ctx, point) {
-    ctx.beginPath();
-    const x = positionToX(point.timestamp);
-    const y = positionToY(point.value);
-    const radius = 2; // Arc radius
-    const startAngle = 0; // Starting point on circle
-    const endAngle = 360;
-
-    ctx.arc(x, y, radius, startAngle, endAngle, false);
-    ctx.fill();
+    const scaled = scale(points, 50, maxValue);
+    drawSeries(scaled, ctx);
 }
 
 function drawYAxis(ctx, labels) {
@@ -73,6 +60,21 @@ function drawYAxis(ctx, labels) {
         ctx.textBaseline = 'middle';
         ctx.fillText(label.text, MARGIN_LEFT - LABEL_MARK_LENGTH - 1, y);
     });
+}
+
+function drawSeries(points, ctx) {
+    ctx.beginPath();
+    points.forEach((point, i) => {
+        const x = positionToX(point.timestamp);
+        const y = positionToY(point.value);
+
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+    ctx.stroke();
 }
 
 function positionToX(position) {

@@ -7,22 +7,25 @@ export default class NumberInput extends React.Component {
         this.state = {
             value: props.value,
         };
-        this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleChange = this.handleChange.bind(this);
+        this.handleBlur = this.handleBlur.bind(this);
     }
 
-    handleInputChange(event) {
-        const value = event.target.value;
+    handleChange(event) {
         this.setState({
-            value,
+            value: parseInt(event.target.value),
         });
-        this.props.onChange(parseInt(value));
+    }
+
+    handleBlur() {
+        this.props.onChange(this.state.value);
     }
 
     render() {
         return <p>
             <label>
                 {this.props.label}:{' '}
-                <input type="number" value={this.state.value} onChange={this.handleInputChange}/>
+                <input type="number" value={this.state.value} onBlur={this.handleBlur} onChange={this.handleChange}/>
             </label>
         </p>;
     }

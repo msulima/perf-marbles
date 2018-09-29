@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import run from './queue';
+import format from './format';
 import Chart from "./chart/chart";
 import NumberInput from './input';
 
@@ -46,7 +47,7 @@ class Marbles extends React.Component {
         return <div>
             <NumberInput label="Interval" value={this.state.interval} onChange={value => this.setInterval(value)}/>
             <NumberInput label="Task size" value={this.state.taskSize} onChange={value => this.setTaskSize(value)}/>
-            <Index averageLatency={averageLatency} queueLength={queueLength}/>
+            <Index averageLatency={format(averageLatency)} queueLength={queueLength}/>
             <Chart points={lastAverages}/>
         </div>
     }
