@@ -2,34 +2,51 @@ import React from "react";
 import ReactDOM from "react-dom";
 import run from './queue';
 import format from './format';
+import stats from './stats';
 import Chart from "./chart/chart";
 import NumberInput from './input';
 import ArrivalRatePicker from './distribution/ArrivalRatePicker';
+
+const MAX_HISTORY = 50;
 
 class Marbles extends React.Component {
 
     constructor() {
         super();
         this.state = {
+            iteration: 0,
             arrival: ArrivalRatePicker.getInitialState(),
             taskSize: 100,
             queue: {
                 lastArrival: 0,
                 queue: [],
                 processor: null,
-                history: [],
-                lastAverages: [],
             },
+            queueHistory: [],
+            statsHistory: [stats([])],
         };
         this.handleChangeDistribution = this.handleChangeDistribution.bind(this);
     }
 
     componentDidMount() {
         window.setInterval(() => {
+            const queue = run(this.state.queue, this.state.arrival.generator, this.state.taskSize, this.state.iteration * 200);
+
+            const queueHistory = this.state.queueHistory.concat([queue]);
+            const statsHistory = this.state.statsHistory.concat([stats(queueHistory)]);
+
+            if (queueHistory.length > MAX_HISTORY) {
+                queueHistory.shift();
+                statsHistory.shift();
+            }
+
             this.setState({
-                queue: run(this.state.queue, this.state.arrival.generator, this.state.taskSize),
+                iteration: this.state.iteration + 1,
+                queue,
+                queueHistory,
+                statsHistory,
             });
-        }, 500);
+        }, 200);
     }
 
     setTaskSize(taskSize) {
@@ -47,26 +64,31 @@ class Marbles extends React.Component {
     }
 
     render() {
-        const lastAverages = this.state.queue.lastAverages;
-        const averageLatency = lastAverages.length > 0 ? lastAverages[lastAverages.length - 1].value : 0;
-        const queueLength = this.state.queue.queue.length;
+        const statsResult = this.state.statsHistory[this.state.statsHistory.length - 1];
+        console.log(statsResult);
 
-        console.log("Average latency", averageLatency, "Queue length", queueLength);
+        const lastAverages = [];
+        for (let i = 0; i < this.state.statsHistory.length; i++) {
+            lastAverages.push({
+                timestamp: i * 500,
+                value: this.state.statsHistory[i].averageLatency,
+            });
+        }
+
         return <div>
             <ArrivalRatePicker onChangeDistribution={this.handleChangeDistribution}/>
-            <NumberInput label="Interval" value={this.state.interval} onChange={value => this.setInterval(value)}/>
             <NumberInput label="Task size" value={this.state.taskSize} onChange={value => this.setTaskSize(value)}/>
-            <Index averageLatency={format(averageLatency)} queueLength={queueLength}/>
+            <div>
+                <Meter label="Arrival rate" count={format(this.state.arrival.arrivalRate)}/>
+                <Meter label="Queue length" count={statsResult.queueLength}/>
+                <Meter label="Average latency" count={format(statsResult.averageLatency)}/>
+                <Meter label="Expected utilisation"
+                       count={format((this.state.taskSize / 1000) * this.state.arrival.arrivalRate, 0.1)}/>
+                <Meter label="Utilisation" count={format(statsResult.utilisation, 0.1)}/>
+            </div>
             <Chart points={lastAverages}/>
         </div>
     }
-}
-
-function Index({averageLatency, queueLength}) {
-    return <div>
-        <Meter label="Queue length" count={queueLength}/>
-        <Meter label="Average latency" count={averageLatency}/>
-    </div>;
 }
 
 function Meter({label, count}) {

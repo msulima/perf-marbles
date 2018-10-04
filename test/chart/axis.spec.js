@@ -5,8 +5,8 @@ import {axisLabels} from '../../src/chart/axis';
 describe('Axis', function () {
     it('rounds max to next order of magnitude', function () {
         // given
-        const minValue = 100;
-        const maxValue = 300;
+        const minValue = 1;
+        const maxValue = 3;
         const bars = 4;
 
         // when
@@ -15,19 +15,19 @@ describe('Axis', function () {
         // then
         expect(scaled).to.deep.equal([{
             position: 0,
-            text: '100.0',
+            text: '1.0',
         }, {
             position: 1 / 4,
-            text: '150.0',
+            text: '1.5',
         }, {
             position: 1 / 2,
-            text: '200.0',
+            text: '2.0',
         }, {
             position: 3 / 4,
-            text: '250.0',
+            text: '2.5',
         }, {
             position: 1,
-            text: '300.0',
+            text: '3.0',
         }]);
     });
 });

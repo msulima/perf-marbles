@@ -11,9 +11,9 @@ export default function process(state, deadline) {
             processor = null;
         }
     }
-    while (queue.length > 0 && processor === null) {
+    while (processor === null && queue.length > 0 && queue[0].arrivedAt < deadline) {
         processor = Object.assign({}, queue.shift());
-        processor.startedAt = Math.max(processor.arrivedAt, now);
+        processor.startedAt = getStartTime(processor, now);
 
         now = processor.startedAt + processor.size;
         if (now < deadline) {
@@ -27,4 +27,8 @@ export default function process(state, deadline) {
         processor,
         queue,
     };
+}
+
+function getStartTime(task, now) {
+    return Math.max(task.arrivedAt, now);
 }

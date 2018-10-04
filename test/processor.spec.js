@@ -6,7 +6,6 @@ describe('Processor', function () {
 
     it('should finish all tasks before deadline', function () {
         // given
-        const processor = null;
         const queue = [{
             arrivedAt: 530,
             size: 20,
@@ -17,6 +16,7 @@ describe('Processor', function () {
             arrivedAt: 580,
             size: 20,
         }];
+        const processor = null;
         const deadline = 600;
 
         // when
@@ -24,6 +24,12 @@ describe('Processor', function () {
 
         // then
         expect(nextState).to.deep.equal({
+            queue: [],
+            processor: {
+                arrivedAt: 580,
+                startedAt: 580,
+                size: 20,
+            },
             finished: [{
                 arrivedAt: 530,
                 startedAt: 530,
@@ -33,18 +39,11 @@ describe('Processor', function () {
                 startedAt: 550,
                 size: 20,
             }],
-            processor: {
-                arrivedAt: 580,
-                startedAt: 580,
-                size: 20,
-            },
-            queue: []
         });
     });
 
     it('should start tasks later if processor is occupied', function () {
         // given
-        const processor = null;
         const queue = [{
             arrivedAt: 530,
             size: 30,
@@ -52,6 +51,7 @@ describe('Processor', function () {
             arrivedAt: 550,
             size: 20,
         }];
+        const processor = null;
         const deadline = 600;
 
         // when
@@ -59,6 +59,8 @@ describe('Processor', function () {
 
         // then
         expect(nextState).to.deep.equal({
+            queue: [],
+            processor: null,
             finished: [{
                 arrivedAt: 530,
                 startedAt: 530,
@@ -68,22 +70,20 @@ describe('Processor', function () {
                 startedAt: 560,
                 size: 20,
             }],
-            processor: null,
-            queue: []
         });
     });
 
     it('should finish currently executing tasks', function () {
         // given
+        const queue = [{
+            arrivedAt: 550,
+            size: 20,
+        }];
         const processor = {
             arrivedAt: 530,
             startedAt: 580,
             size: 30,
         };
-        const queue = [{
-            arrivedAt: 550,
-            size: 20,
-        }];
         const deadline = 700;
 
         // when
@@ -91,6 +91,8 @@ describe('Processor', function () {
 
         // then
         expect(nextState).to.deep.equal({
+            queue: [],
+            processor: null,
             finished: [{
                 arrivedAt: 530,
                 startedAt: 580,
@@ -100,8 +102,29 @@ describe('Processor', function () {
                 startedAt: 610,
                 size: 20,
             }],
+        });
+    });
+
+    it('should not start tasks from the future', function () {
+        // given
+        const queue = [{
+            arrivedAt: 530,
+            size: 30,
+        }, {
+            arrivedAt: 550,
+            size: 20,
+        }];
+        const processor = null;
+        const deadline = 500;
+
+        // when
+        const nextState = process({queue, processor}, deadline);
+
+        // then
+        expect(nextState).to.deep.equal({
+            queue,
             processor: null,
-            queue: []
+            finished: [],
         });
     });
 });
