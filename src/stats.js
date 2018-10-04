@@ -1,10 +1,10 @@
-export default function stats(history) {
+export default function stats(history, deadline) {
     const finished = getAllFinished(history);
 
     return {
         averageLatency: getAverage(finished),
         utilisation: getUtilisation(history),
-        queueLength: getQueueLength(history),
+        queueLength: getQueueLength(history, deadline),
     };
 }
 
@@ -32,6 +32,7 @@ function getUtilisation(history) {
     return (history.length > 0 ? totalUtilised / history.length : 0);
 }
 
-function getQueueLength(history) {
-    return (history.length > 0 ? history[history.length - 1].queue.length : 0);
+function getQueueLength(history, deadline) {
+    const lastQueue = (history.length > 0 ? history[history.length - 1].queue : []);
+    return lastQueue.filter(task => task.arrivedAt < deadline).length;
 }

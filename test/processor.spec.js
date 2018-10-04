@@ -105,6 +105,36 @@ describe('Processor', function () {
         });
     });
 
+    it('should queue tasks if busy', function () {
+        // given
+        const queue = [{
+            arrivedAt: 550,
+            size: 50,
+        }, {
+            arrivedAt: 580,
+            size: 20,
+        }];
+        const processor = null;
+        const deadline = 600;
+
+        // when
+        const nextState = process({queue, processor}, deadline);
+
+        // then
+        expect(nextState).to.deep.equal({
+            queue: [{
+                arrivedAt: 580,
+                size: 20,
+            }],
+            processor: {
+                arrivedAt: 550,
+                startedAt: 550,
+                size: 50,
+            },
+            finished: [],
+        });
+    });
+
     it('should not start tasks from the future', function () {
         // given
         const queue = [{

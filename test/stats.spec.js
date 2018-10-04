@@ -67,13 +67,17 @@ describe('Stats', function () {
                 arrivedAt: 550,
                 startedAt: 570,
                 size: 20,
+            }, {
+                arrivedAt: 600,
+                size: 20,
             }],
             processor: null,
             finished: [],
         }];
+        const deadline = 600;
 
         // when
-        const result = stats(queues);
+        const result = stats(queues, deadline);
 
         // then
         expect(result).to.have.property('queueLength', 1);

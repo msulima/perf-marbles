@@ -30,10 +30,11 @@ class Marbles extends React.Component {
 
     componentDidMount() {
         window.setInterval(() => {
-            const queue = run(this.state.queue, this.state.arrival.generator, this.state.taskSize, this.state.iteration * 200);
+            const deadline = this.state.iteration * 200;
+            const queue = run(this.state.queue, this.state.arrival.generator, this.state.taskSize, deadline);
 
             const queueHistory = this.state.queueHistory.concat([queue]);
-            const statsHistory = this.state.statsHistory.concat([stats(queueHistory)]);
+            const statsHistory = this.state.statsHistory.concat([stats(queueHistory, deadline)]);
 
             if (queueHistory.length > MAX_HISTORY) {
                 queueHistory.shift();
@@ -75,6 +76,14 @@ class Marbles extends React.Component {
             });
         }
 
+        const lastUtilisations = [];
+        for (let i = 0; i < this.state.statsHistory.length; i++) {
+            lastUtilisations.push({
+                timestamp: i,
+                value: this.state.statsHistory[i].utilisation,
+            });
+        }
+
         return <div>
             <ArrivalRatePicker onChangeDistribution={this.handleChangeDistribution}/>
             <NumberInput label="Task size (ms)" value={this.state.taskSize}
@@ -88,6 +97,7 @@ class Marbles extends React.Component {
                 <Meter label="Utilisation" count={format(statsResult.utilisation, 0.1)}/>
             </div>
             <Chart points={lastAverages} maxHistory={MAX_HISTORY}/>
+            <Chart points={lastUtilisations} maxHistory={MAX_HISTORY}/>
         </div>
     }
 }
