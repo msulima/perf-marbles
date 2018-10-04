@@ -14,9 +14,10 @@ const LABEL_MARK_LENGTH = 5;
 
 
 export default class Chart extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.canvasRef = null;
+        this.maxHistory = props.maxHistory;
         this.setCanvasRef = element => {
             this.canvasRef = element;
         };
@@ -24,13 +25,13 @@ export default class Chart extends React.Component {
 
     render() {
         if (this.canvasRef !== null) {
-            draw(this.canvasRef, this.props.points);
+            draw(this.canvasRef, this.props.points, this.props.maxHistory);
         }
         return <canvas ref={this.setCanvasRef} width={WIDTH} height={HEIGHT}/>
     }
 }
 
-function draw(canvas, points) {
+function draw(canvas, points, maxHistory) {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
@@ -38,7 +39,7 @@ function draw(canvas, points) {
     const axisYLabels = axisLabels(0, maxValue, 5);
 
     drawYAxis(ctx, axisYLabels);
-    const scaled = scale(points, 50, maxValue);
+    const scaled = scale(points, maxHistory, maxValue);
     drawSeries(scaled, ctx);
 }
 

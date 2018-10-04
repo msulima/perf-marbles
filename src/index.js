@@ -7,7 +7,7 @@ import Chart from "./chart/chart";
 import NumberInput from './input';
 import ArrivalRatePicker from './distribution/ArrivalRatePicker';
 
-const MAX_HISTORY = 50;
+const MAX_HISTORY = 200;
 
 class Marbles extends React.Component {
 
@@ -70,14 +70,15 @@ class Marbles extends React.Component {
         const lastAverages = [];
         for (let i = 0; i < this.state.statsHistory.length; i++) {
             lastAverages.push({
-                timestamp: i * 500,
+                timestamp: i,
                 value: this.state.statsHistory[i].averageLatency,
             });
         }
 
         return <div>
             <ArrivalRatePicker onChangeDistribution={this.handleChangeDistribution}/>
-            <NumberInput label="Task size" value={this.state.taskSize} onChange={value => this.setTaskSize(value)}/>
+            <NumberInput label="Task size (ms)" value={this.state.taskSize}
+                         onChange={value => this.setTaskSize(value)}/>
             <div>
                 <Meter label="Arrival rate" count={format(this.state.arrival.arrivalRate)}/>
                 <Meter label="Queue length" count={statsResult.queueLength}/>
@@ -86,7 +87,7 @@ class Marbles extends React.Component {
                        count={format((this.state.taskSize / 1000) * this.state.arrival.arrivalRate, 0.1)}/>
                 <Meter label="Utilisation" count={format(statsResult.utilisation, 0.1)}/>
             </div>
-            <Chart points={lastAverages}/>
+            <Chart points={lastAverages} maxHistory={MAX_HISTORY}/>
         </div>
     }
 }
