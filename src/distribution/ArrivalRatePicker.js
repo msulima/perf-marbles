@@ -22,6 +22,7 @@ export default class ArrivalRatePicker extends React.Component {
         this.handleChangeDistribution = this.handleChangeDistribution.bind(this);
         this.handleChangeMean = this.handleChangeMean.bind(this);
         this.handleChangeBeta = this.handleChangeBeta.bind(this);
+        this.handleChangeBeta = this.handleChangeBeta.bind(this);
     }
 
     handleChangeDistribution(distribution) {
@@ -70,6 +71,8 @@ function distribution(name) {
             return uniform;
         case "normal":
             return normal;
+        case "exp":
+            return exp;
     }
 }
 
@@ -79,6 +82,10 @@ function uniform(mean, beta) {
 
 function normal(mean, beta) {
     return gaussianRand() * mean * 2;
+}
+
+function exp(mean) {
+    return -Math.log(Math.random()) * mean;
 }
 
 function gaussianRand() {

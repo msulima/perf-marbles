@@ -15,7 +15,7 @@ export default function run(state, arrivalGenerator, taskSize, now) {
 
 function runArrive(state, arrivalGenerator, taskSize, now) {
     const {lastArrival, queue} = state;
-    console.log(arrivalGenerator());
+
     return arrive(arrivalGenerator, () => taskSize, {
         lastArrival,
         queue,

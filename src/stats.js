@@ -1,8 +1,10 @@
 export default function stats(history, deadline) {
     const finished = getAllFinished(history);
+    const {latency, response} = getAverage(finished);
 
     return {
-        averageLatency: getAverage(finished),
+        averageLatency: latency,
+        averageResponse: response,
         utilisation: getUtilisation(history),
         queueLength: getQueueLength(history, deadline),
     };
@@ -15,12 +17,23 @@ function getAllFinished(history) {
 }
 
 function getAverage(finished) {
+    if (finished.length === 0) {
+        return {
+            latency: 0,
+            response: 0,
+        }
+    }
     let totalLatency = 0;
+    let totalResponse = 0;
     finished.forEach(task => {
         totalLatency += task.startedAt - task.arrivedAt;
+        totalResponse += task.size + task.startedAt - task.arrivedAt;
     });
 
-    return (finished.length > 0 ? totalLatency / finished.length : 0);
+    return {
+        latency: totalLatency / finished.length,
+        response: totalResponse / finished.length,
+    };
 }
 
 function getUtilisation(history) {

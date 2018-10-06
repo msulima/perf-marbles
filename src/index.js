@@ -7,7 +7,8 @@ import Chart from "./chart/chart";
 import NumberInput from './input';
 import ArrivalRatePicker from './distribution/ArrivalRatePicker';
 
-const MAX_HISTORY = 200;
+const MAX_HISTORY = 1000;
+const MAX_STATS = MAX_HISTORY / 4;
 
 class Marbles extends React.Component {
 
@@ -30,11 +31,11 @@ class Marbles extends React.Component {
 
     componentDidMount() {
         window.setInterval(() => {
-            const deadline = this.state.iteration * 200;
+            const deadline = this.state.iteration * 500;
             const queue = run(this.state.queue, this.state.arrival.generator, this.state.taskSize, deadline);
 
             const queueHistory = this.state.queueHistory.concat([queue]);
-            const statsHistory = this.state.statsHistory.concat([stats(queueHistory, deadline)]);
+            const statsHistory = this.state.statsHistory.concat([stats(queueHistory.slice(-MAX_STATS), deadline)]);
 
             if (queueHistory.length > MAX_HISTORY) {
                 queueHistory.shift();
@@ -47,7 +48,7 @@ class Marbles extends React.Component {
                 queueHistory,
                 statsHistory,
             });
-        }, 200);
+        }, 50);
     }
 
     setTaskSize(taskSize) {
@@ -68,36 +69,23 @@ class Marbles extends React.Component {
         const statsResult = this.state.statsHistory[this.state.statsHistory.length - 1];
         console.log(statsResult);
 
-        const lastAverages = [];
-        for (let i = 0; i < this.state.statsHistory.length; i++) {
-            lastAverages.push({
-                timestamp: i,
-                value: this.state.statsHistory[i].averageLatency,
-            });
-        }
-
-        const lastUtilisations = [];
-        for (let i = 0; i < this.state.statsHistory.length; i++) {
-            lastUtilisations.push({
-                timestamp: i,
-                value: this.state.statsHistory[i].utilisation,
-            });
-        }
-
         return <div>
             <ArrivalRatePicker onChangeDistribution={this.handleChangeDistribution}/>
             <NumberInput label="Task size (ms)" value={this.state.taskSize}
                          onChange={value => this.setTaskSize(value)}/>
             <div>
                 <Meter label="Arrival rate" count={format(this.state.arrival.arrivalRate)}/>
-                <Meter label="Queue length" count={statsResult.queueLength}/>
-                <Meter label="Average latency" count={format(statsResult.averageLatency)}/>
                 <Meter label="Expected utilisation"
                        count={format((this.state.taskSize / 1000) * this.state.arrival.arrivalRate, 0.1)}/>
                 <Meter label="Utilisation" count={format(statsResult.utilisation, 0.1)}/>
+                <Meter label="Average latency" count={format(statsResult.averageLatency)}/>
+                <Meter label="Average response" count={format(statsResult.averageResponse)}/>
+                <Meter label="Queue length" count={statsResult.queueLength}/>
             </div>
-            <Chart points={lastAverages} maxHistory={MAX_HISTORY}/>
-            <Chart points={lastUtilisations} maxHistory={MAX_HISTORY}/>
+            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.utilisation)} maxHistory={MAX_HISTORY}/>
+            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.averageLatency)} maxHistory={MAX_HISTORY}/>
+            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.averageResponse)} maxHistory={MAX_HISTORY}/>
+            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.queueLength)} maxHistory={MAX_HISTORY}/>
         </div>
     }
 }
@@ -106,6 +94,17 @@ function Meter({label, count}) {
     return <p>
         <span>{label}:</span> <span>{count}</span>
     </p>;
+}
+
+function toChartSeries(history, getter) {
+    const result = [];
+    for (let i = 0; i < history.length; i++) {
+        result.push({
+            timestamp: i,
+            value: getter(history[i]),
+        });
+    }
+    return result;
 }
 
 ReactDOM.render(<Marbles/>, document.getElementById("index"));
