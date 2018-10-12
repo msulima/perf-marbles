@@ -1,0 +1,15 @@
+:local(.charts) {
+    display: grid;
+    font-family: sans-serif;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 600px) {
+    :local(.charts) {
+        grid-template-columns: 1fr;
+    }
+}
+
+:local(.charts-chart) {
+    overflow: hidden;
+}

@@ -7,6 +7,10 @@ import Chart from "./chart/chart";
 import NumberInput from './input';
 import ArrivalRatePicker from './distribution/ArrivalRatePicker';
 
+import styles from './index.css';
+
+console.log('wat', styles);
+
 const MAX_HISTORY = 1000;
 const MAX_STATS = MAX_HISTORY / 4;
 
@@ -77,15 +81,29 @@ class Marbles extends React.Component {
                 <Meter label="Arrival rate" count={format(this.state.arrival.arrivalRate)}/>
                 <Meter label="Expected utilisation"
                        count={format((this.state.taskSize / 1000) * this.state.arrival.arrivalRate, 0.1)}/>
-                <Meter label="Utilisation" count={format(statsResult.utilisation, 0.1)}/>
-                <Meter label="Average latency" count={format(statsResult.averageLatency)}/>
-                <Meter label="Average response" count={format(statsResult.averageResponse)}/>
-                <Meter label="Queue length" count={statsResult.queueLength}/>
             </div>
-            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.utilisation)} maxHistory={MAX_HISTORY}/>
-            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.averageLatency)} maxHistory={MAX_HISTORY}/>
-            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.averageResponse)} maxHistory={MAX_HISTORY}/>
-            <Chart points={toChartSeries(this.state.statsHistory, (x) => x.queueLength)} maxHistory={MAX_HISTORY}/>
+            <div className={styles['charts']}>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Average latency" current={format(statsResult.averageLatency) + " ms"}
+                           points={toChartSeries(this.state.statsHistory, (x) => x.averageLatency)}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Average response" current={format(statsResult.averageResponse) + " ms"}
+                           points={toChartSeries(this.state.statsHistory, (x) => x.averageResponse)}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Utilisation" current={format(statsResult.utilisation * 100, 100) + "%"}
+                           points={toChartSeries(this.state.statsHistory, (x) => x.utilisation)}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Queue length" current={statsResult.queueLength}
+                           points={toChartSeries(this.state.statsHistory, (x) => x.queueLength)}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+            </div>
         </div>
     }
 }

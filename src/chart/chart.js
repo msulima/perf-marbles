@@ -5,9 +5,9 @@ import {axisLabels} from './axis';
 
 const WIDTH = 1000;
 const HEIGHT = 400;
-const MARGIN_LEFT = 50;
+const MARGIN_LEFT = 25;
 const MARGIN_TOP = 10;
-const MARGIN_RIGHT = 25;
+const MARGIN_RIGHT = 50;
 const MARGIN_BOTTOM = 25;
 
 const LABEL_MARK_LENGTH = 5;
@@ -24,49 +24,60 @@ export default class Chart extends React.Component {
     }
 
     render() {
+        let width = MARGIN_LEFT + MARGIN_RIGHT;
         if (this.canvasRef !== null) {
-            draw(this.canvasRef, this.props.points, this.props.maxHistory);
+            width = Math.floor(Math.max(width, this.canvasRef.parentElement.getBoundingClientRect().width));
+            draw(this.canvasRef, width, this.props.points, this.props.maxHistory);
         }
-        return <canvas ref={this.setCanvasRef} width={WIDTH} height={HEIGHT}/>
+        return <div>
+            <h2>{this.props.title}: {this.props.current}</h2>
+            <canvas ref={this.setCanvasRef} width={width} height={HEIGHT}/>
+        </div>
     }
 }
 
-function draw(canvas, points, maxHistory) {
+function draw(canvas, width, points, maxHistory) {
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    ctx.clearRect(0, 0, width, HEIGHT);
 
     const maxValue = getScaledMaxValue(points);
     const axisYLabels = axisLabels(0, maxValue, 5);
 
-    drawYAxis(ctx, axisYLabels);
+    drawXAxis(ctx, width);
+    drawYAxis(ctx, width, axisYLabels);
     const scaled = scale(points, maxHistory, maxValue);
-    drawSeries(scaled, ctx);
+    drawSeries(ctx, width, scaled);
 }
 
-function drawYAxis(ctx, labels) {
+function drawXAxis(ctx, width) {
     ctx.beginPath();
-    ctx.moveTo(MARGIN_LEFT, MARGIN_TOP);
-    ctx.lineTo(MARGIN_LEFT, HEIGHT - MARGIN_BOTTOM);
-    ctx.closePath();
+    ctx.moveTo(MARGIN_LEFT, HEIGHT - MARGIN_BOTTOM);
+    ctx.lineTo(width - MARGIN_RIGHT, HEIGHT - MARGIN_BOTTOM);
+    ctx.stroke();
+}
+
+function drawYAxis(ctx, width, labels) {
+    ctx.beginPath();
+    const positionX = width - MARGIN_RIGHT;
+    ctx.moveTo(positionX, MARGIN_TOP);
+    ctx.lineTo(positionX, HEIGHT - MARGIN_BOTTOM);
     ctx.stroke();
 
     labels.forEach(label => {
-        ctx.beginPath();
         const y = positionToY(label.position);
-        ctx.moveTo(MARGIN_LEFT - LABEL_MARK_LENGTH, y);
-        ctx.lineTo(MARGIN_LEFT, y);
-        ctx.closePath();
+        ctx.moveTo(positionX + LABEL_MARK_LENGTH, y);
+        ctx.lineTo(positionX, y);
         ctx.stroke();
-        ctx.textAlign = 'right';
+        ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(label.text, MARGIN_LEFT - LABEL_MARK_LENGTH - 1, y);
+        ctx.fillText(label.text, positionX + LABEL_MARK_LENGTH + 1, y);
     });
 }
 
-function drawSeries(points, ctx) {
+function drawSeries(ctx, width, points) {
     ctx.beginPath();
     points.forEach((point, i) => {
-        const x = positionToX(point.timestamp);
+        const x = positionToX(width, point.timestamp);
         const y = positionToY(point.value);
 
         if (i === 0) {
@@ -78,8 +89,8 @@ function drawSeries(points, ctx) {
     ctx.stroke();
 }
 
-function positionToX(position) {
-    return WIDTH - MARGIN_RIGHT + position * (WIDTH - MARGIN_RIGHT - MARGIN_LEFT);
+function positionToX(width, position) {
+    return width - MARGIN_RIGHT + position * (width - MARGIN_RIGHT - MARGIN_LEFT);
 }
 
 function positionToY(position) {
