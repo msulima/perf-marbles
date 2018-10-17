@@ -78,9 +78,9 @@ class Marbles extends React.Component {
             <NumberInput label="Task size (ms)" value={this.state.taskSize}
                          onChange={value => this.setTaskSize(value)}/>
             <div>
-                <Meter label="Arrival rate" count={format(this.state.arrival.arrivalRate)}/>
+                <Meter label="Expected arrival rate" count={format(this.state.arrival.arrivalRate) + " tasks/s"}/>
                 <Meter label="Expected utilisation"
-                       count={format((this.state.taskSize / 1000) * this.state.arrival.arrivalRate, 0.1)}/>
+                       count={format((this.state.taskSize / 10) * this.state.arrival.arrivalRate, 100) + "%"}/>
             </div>
             <div className={styles['charts']}>
                 <div className={styles['charts-chart']}>
@@ -101,6 +101,11 @@ class Marbles extends React.Component {
                 <div className={styles['charts-chart']}>
                     <Chart title="Queue length" current={statsResult.queueLength}
                            points={toChartSeries(this.state.statsHistory, (x) => x.queueLength)}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Arrival rate" current={format(statsResult.arrivalRate) + " tasks/s"}
+                           points={toChartSeries(this.state.statsHistory, (x) => x.arrivalRate)}
                            maxHistory={MAX_HISTORY}/>
                 </div>
             </div>

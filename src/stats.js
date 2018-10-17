@@ -6,6 +6,7 @@ export default function stats(history, deadline) {
         averageLatency: latency,
         averageResponse: response,
         utilisation: getUtilisation(history),
+        arrivalRate: getArrivalRate(finished),
         queueLength: getQueueLength(history, deadline),
     };
 }
@@ -43,6 +44,14 @@ function getUtilisation(history) {
     });
 
     return (history.length > 0 ? totalUtilised / history.length : 0);
+}
+
+function getArrivalRate(history) {
+    if (history.length < 2) {
+        return 0;
+    }
+
+    return 1000 * (history.length - 1) / (history[history.length - 1].arrivedAt - history[0].arrivedAt);
 }
 
 function getQueueLength(history, deadline) {

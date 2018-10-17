@@ -6,8 +6,7 @@ describe('Stats', function () {
 
     it('should calculate average latency from history', function () {
         // given
-        const processor = null;
-        const queues = [{
+        const history = [{
             queue: [],
             processor: null,
             finished: [{
@@ -26,7 +25,7 @@ describe('Stats', function () {
         }];
 
         // when
-        const result = stats(queues);
+        const result = stats(history);
 
         // then
         expect(result).to.have.property('averageLatency', 10);
@@ -34,8 +33,7 @@ describe('Stats', function () {
 
     it('should calculate average utilisation', function () {
         // given
-        const processor = null;
-        const queues = [{
+        const history = [{
             queue: [],
             processor: null,
             finished: []
@@ -50,7 +48,7 @@ describe('Stats', function () {
         }];
 
         // when
-        const result = stats(queues);
+        const result = stats(history);
 
         // then
         expect(result).to.have.property('utilisation', 1 / 2);
@@ -58,8 +56,7 @@ describe('Stats', function () {
 
     it('should current queue length', function () {
         // given
-        const processor = null;
-        const queues = [{
+        const history = [{
             processor: null,
             finished: []
         }, {
@@ -77,9 +74,37 @@ describe('Stats', function () {
         const deadline = 600;
 
         // when
-        const result = stats(queues, deadline);
+        const result = stats(history, deadline);
 
         // then
         expect(result).to.have.property('queueLength', 1);
+    });
+
+    it('should average rate', function () {
+        // given
+        const history = [{
+            queue: [],
+            processor: null,
+            finished: [{
+                arrivedAt: 530,
+                startedAt: 530,
+                size: 20,
+            }]
+        }, {
+            queue: [],
+            processor: null,
+            finished: [{
+                arrivedAt: 630,
+                startedAt: 670,
+                size: 20,
+            }],
+        }];
+        const deadline = 600;
+
+        // when
+        const result = stats(history, deadline);
+
+        // then
+        expect(result).to.have.property('arrivalRate', 10);
     });
 });
