@@ -10,7 +10,7 @@ export default class ArrivalRatePicker extends React.Component {
 
     static getInitial() {
         return {
-            distribution: "uniform",
+            distribution: "exp",
             mean: 250,
             beta: 200,
         };
@@ -21,7 +21,6 @@ export default class ArrivalRatePicker extends React.Component {
         this.state = ArrivalRatePicker.getInitial();
         this.handleChangeDistribution = this.handleChangeDistribution.bind(this);
         this.handleChangeMean = this.handleChangeMean.bind(this);
-        this.handleChangeBeta = this.handleChangeBeta.bind(this);
         this.handleChangeBeta = this.handleChangeBeta.bind(this);
     }
 
@@ -53,6 +52,7 @@ export default class ArrivalRatePicker extends React.Component {
         return <fieldset>
             <DistributionPicker checked={this.state.distribution} onChange={this.handleChangeDistribution}/>
             <ParametersPicker mean={this.state.mean} beta={this.state.beta}
+                              betaEnabled={this.state.distribution === 'uniform'}
                               onChangeMean={this.handleChangeMean} onChangeBeta={this.handleChangeBeta}/>
         </fieldset>;
     }

@@ -45,8 +45,8 @@ function draw(canvas, width, points, maxHistory) {
 
     drawXAxis(ctx, width);
     drawYAxis(ctx, width, axisYLabels);
-    const scaled = scale(points, maxHistory, maxValue);
-    drawSeries(ctx, width, scaled);
+    const scaled = scale(points, maxValue);
+    drawSeries(ctx, width, maxHistory, scaled);
 }
 
 function drawXAxis(ctx, width) {
@@ -74,10 +74,11 @@ function drawYAxis(ctx, width, labels) {
     });
 }
 
-function drawSeries(ctx, width, points) {
+function drawSeries(ctx, width, maxHistory, points) {
+    const leftFill = maxHistory - points.length;
     ctx.beginPath();
     points.forEach((point, i) => {
-        const x = positionToX(width, point.timestamp);
+        const x = positionToX(width, (i + leftFill) / maxHistory);
         const y = positionToY(point.value);
 
         if (i === 0) {
@@ -90,7 +91,7 @@ function drawSeries(ctx, width, points) {
 }
 
 function positionToX(width, position) {
-    return width - MARGIN_RIGHT + position * (width - MARGIN_RIGHT - MARGIN_LEFT);
+    return MARGIN_LEFT + position * (width - MARGIN_RIGHT - MARGIN_LEFT);
 }
 
 function positionToY(position) {

@@ -2,13 +2,13 @@ export default function stats(history, deadline) {
     const finished = getAllFinished(history);
     const {latency, response} = getAverage(finished);
 
-    return {
+    return Object.assign({
         averageLatency: latency,
         averageResponse: response,
         utilisation: getUtilisation(history),
         arrivalRate: getArrivalRate(finished),
         queueLength: getQueueLength(history, deadline),
-    };
+    }, getPercentiles(finished));
 }
 
 function getAllFinished(history) {
@@ -57,4 +57,18 @@ function getArrivalRate(history) {
 function getQueueLength(history, deadline) {
     const lastQueue = (history.length > 0 ? history[history.length - 1].queue : []);
     return lastQueue.filter(task => task.arrivedAt < deadline).length;
+}
+
+function getPercentiles(finished) {
+    const sizes = finished.map(task => task.size);
+    return {
+        p50: getPercentile(sizes, 50),
+        p75: getPercentile(sizes, 75),
+        p95: getPercentile(sizes, 95),
+        p99: getPercentile(sizes, 99),
+    }
+}
+
+function getPercentile(data, n) {
+    return data[Math.floor(data.length * n / 100)];
 }

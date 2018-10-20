@@ -107,4 +107,43 @@ describe('Stats', function () {
         // then
         expect(result).to.have.property('arrivalRate', 10);
     });
+
+    it('should average percentiles', function () {
+        // given
+        const history = [{
+            queue: [],
+            processor: null,
+            finished: [
+                finishedIn(0),
+                finishedIn(10),
+                finishedIn(20),
+                finishedIn(30),
+                finishedIn(40),
+                finishedIn(50),
+                finishedIn(60),
+                finishedIn(70),
+                finishedIn(80),
+                finishedIn(90),
+                finishedIn(100),
+            ]
+        }];
+        const deadline = 100;
+
+        // when
+        const result = stats(history, deadline);
+
+        // then
+        expect(result).to.have.property('p50', 50);
+        expect(result).to.have.property('p75', 80);
+        expect(result).to.have.property('p95', 100);
+        expect(result).to.have.property('p99', 100);
+    });
 });
+
+function finishedIn(time) {
+    return {
+        arrivedAt: 0,
+        startedAt: 0,
+        size: time,
+    };
+}
