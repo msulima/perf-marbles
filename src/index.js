@@ -111,10 +111,10 @@ class Marbles extends React.Component {
                 <div className={styles['charts-chart']}>
                     <Chart title="Percentiles" current={""}
                            points={[
-                               this.state.statsHistory.map((x) => x.p50),
-                               this.state.statsHistory.map((x) => x.p75),
-                               this.state.statsHistory.map((x) => x.p95),
                                this.state.statsHistory.map((x) => x.p99),
+                               this.state.statsHistory.map((x) => x.p95),
+                               this.state.statsHistory.map((x) => x.p75),
+                               this.state.statsHistory.map((x) => x.p50),
                            ]}
                            maxHistory={MAX_HISTORY}/>
                 </div>

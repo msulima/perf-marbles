@@ -3,7 +3,6 @@ import React from "react";
 import scale, {getScaledMaxValue} from './scale';
 import {axisLabels} from './axis';
 
-const WIDTH = 1000;
 const HEIGHT = 400;
 const MARGIN_LEFT = 25;
 const MARGIN_TOP = 10;
@@ -12,6 +11,12 @@ const MARGIN_BOTTOM = 25;
 
 const LABEL_MARK_LENGTH = 5;
 
+const COLOURS = [
+    "#0a437c",
+    "#0a50a1",
+    "#5195ce",
+    "#70dbed",
+];
 
 export default class Chart extends React.Component {
     constructor(props) {
@@ -46,8 +51,8 @@ function draw(canvas, width, series, maxHistory) {
     drawXAxis(ctx, width);
     drawYAxis(ctx, width, axisYLabels);
     const scaled = scale(series, maxValue);
-    scaled.forEach(points => {
-        drawSeries(ctx, width, maxHistory, points);
+    scaled.forEach((points, i) => {
+        drawSeries(ctx, width, maxHistory, points, COLOURS[i] || "#000000");
     });
 }
 
@@ -76,8 +81,12 @@ function drawYAxis(ctx, width, labels) {
     });
 }
 
-function drawSeries(ctx, width, maxHistory, points) {
+function drawSeries(ctx, width, maxHistory, points, colour) {
     const leftFill = maxHistory - points.length;
+    const style = ctx.strokeStyle;
+    ctx.strokeStyle = colour;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
     ctx.beginPath();
     points.forEach((point, i) => {
         const x = positionToX(width, (i + leftFill) / maxHistory);
@@ -90,6 +99,7 @@ function drawSeries(ctx, width, maxHistory, points) {
         }
     });
     ctx.stroke();
+    ctx.strokeStyle = style;
 }
 
 function positionToX(width, position) {
