@@ -108,23 +108,23 @@ describe('Stats', function () {
         expect(result).to.have.property('arrivalRate', 10);
     });
 
-    it('should average percentiles', function () {
+    it('should get percentiles', function () {
         // given
         const history = [{
             queue: [],
             processor: null,
             finished: [
                 finishedIn(0),
-                finishedIn(10),
                 finishedIn(20),
-                finishedIn(30),
+                finishedIn(10),
                 finishedIn(40),
-                finishedIn(50),
+                finishedIn(30),
                 finishedIn(60),
-                finishedIn(70),
+                finishedIn(50),
                 finishedIn(80),
-                finishedIn(90),
+                finishedIn(70),
                 finishedIn(100),
+                finishedIn(90),
             ]
         }];
         const deadline = 100;
@@ -138,12 +138,31 @@ describe('Stats', function () {
         expect(result).to.have.property('p95', 100);
         expect(result).to.have.property('p99', 100);
     });
+
+    it('should get percentiles when no finished tasks', function () {
+        // given
+        const history = [{
+            queue: [],
+            processor: null,
+            finished: []
+        }];
+        const deadline = 100;
+
+        // when
+        const result = stats(history, deadline);
+
+        // then
+        expect(result).to.have.property('p50', 0);
+        expect(result).to.have.property('p75', 0);
+        expect(result).to.have.property('p95', 0);
+        expect(result).to.have.property('p99', 0);
+    });
 });
 
 function finishedIn(time) {
     return {
         arrivedAt: 0,
-        startedAt: 0,
-        size: time,
+        startedAt: 10,
+        size: time - 10,
     };
 }

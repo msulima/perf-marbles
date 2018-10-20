@@ -36,17 +36,19 @@ export default class Chart extends React.Component {
     }
 }
 
-function draw(canvas, width, points, maxHistory) {
+function draw(canvas, width, series, maxHistory) {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, width, HEIGHT);
 
-    const maxValue = getScaledMaxValue(points);
+    const maxValue = getScaledMaxValue(series);
     const axisYLabels = axisLabels(0, maxValue, 5);
 
     drawXAxis(ctx, width);
     drawYAxis(ctx, width, axisYLabels);
-    const scaled = scale(points, maxValue);
-    drawSeries(ctx, width, maxHistory, scaled);
+    const scaled = scale(series, maxValue);
+    scaled.forEach(points => {
+        drawSeries(ctx, width, maxHistory, points);
+    });
 }
 
 function drawXAxis(ctx, width) {
@@ -79,7 +81,7 @@ function drawSeries(ctx, width, maxHistory, points) {
     ctx.beginPath();
     points.forEach((point, i) => {
         const x = positionToX(width, (i + leftFill) / maxHistory);
-        const y = positionToY(point.value);
+        const y = positionToY(point);
 
         if (i === 0) {
             ctx.moveTo(x, y);

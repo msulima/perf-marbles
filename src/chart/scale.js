@@ -1,8 +1,10 @@
-export function getScaledMaxValue(points) {
+export function getScaledMaxValue(series) {
     let maxValue = 0;
 
-    points.forEach(point => {
-        maxValue = Math.max(maxValue, point.value);
+    series.forEach(points => {
+        points.forEach(point => {
+            maxValue = Math.max(maxValue, point);
+        });
     });
 
     if (maxValue === 0) {
@@ -14,18 +16,13 @@ export function getScaledMaxValue(points) {
     return Math.ceil(maxValue / order) * order;
 }
 
-export default function scale(points, maxValue) {
-    if (points.length === 0) {
-        return [];
+export default function scale(series, maxValue) {
+    if (series[0].length === 1 && maxValue !== 1) {
+        return scale(series, 1);
     }
-    if (points.length === 1) {
-        return [{
-            value: 1,
-        }]
-    }
-    return points.map(point => {
-        return Object.assign({}, point, {
-            value: maxValue > 0 ? point.value / maxValue : 0,
+    return series.map(points => {
+        return points.map(point => {
+            return maxValue > 0 ? point / maxValue : 0;
         });
     });
 }

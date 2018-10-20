@@ -85,27 +85,37 @@ class Marbles extends React.Component {
             <div className={styles['charts']}>
                 <div className={styles['charts-chart']}>
                     <Chart title="Average latency" current={format(statsResult.averageLatency) + " ms"}
-                           points={toChartSeries(this.state.statsHistory, (x) => x.averageLatency)}
+                           points={[this.state.statsHistory.map((x) => x.averageLatency)]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
                     <Chart title="Average response" current={format(statsResult.averageResponse) + " ms"}
-                           points={toChartSeries(this.state.statsHistory, (x) => x.averageResponse)}
+                           points={[this.state.statsHistory.map((x) => x.averageResponse)]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
                     <Chart title="Utilisation" current={format(statsResult.utilisation * 100, 100) + "%"}
-                           points={toChartSeries(this.state.statsHistory, (x) => x.utilisation)}
+                           points={[this.state.statsHistory.map((x) => x.utilisation)]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
                     <Chart title="Queue length" current={statsResult.queueLength}
-                           points={toChartSeries(this.state.statsHistory, (x) => x.queueLength)}
+                           points={[this.state.statsHistory.map((x) => x.queueLength)]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
                     <Chart title="Arrival rate" current={format(statsResult.arrivalRate) + " tasks/s"}
-                           points={toChartSeries(this.state.statsHistory, (x) => x.arrivalRate)}
+                           points={[this.state.statsHistory.map((x) => x.arrivalRate)]}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Percentiles" current={""}
+                           points={[
+                               this.state.statsHistory.map((x) => x.p50),
+                               this.state.statsHistory.map((x) => x.p75),
+                               this.state.statsHistory.map((x) => x.p95),
+                               this.state.statsHistory.map((x) => x.p99),
+                           ]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
             </div>
@@ -117,17 +127,6 @@ function Meter({label, count}) {
     return <p>
         <span>{label}:</span> <span>{count}</span>
     </p>;
-}
-
-function toChartSeries(history, getter) {
-    const result = [];
-    for (let i = 0; i < history.length; i++) {
-        result.push({
-            timestamp: i,
-            value: getter(history[i]),
-        });
-    }
-    return result;
 }
 
 ReactDOM.render(<Marbles/>, document.getElementById("index"));

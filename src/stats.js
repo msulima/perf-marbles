@@ -60,7 +60,7 @@ function getQueueLength(history, deadline) {
 }
 
 function getPercentiles(finished) {
-    const sizes = finished.map(task => task.size);
+    const sizes = finished.map(task => task.size + task.startedAt - task.arrivedAt).sort((a, b) => a - b);
     return {
         p50: getPercentile(sizes, 50),
         p75: getPercentile(sizes, 75),
@@ -70,5 +70,8 @@ function getPercentiles(finished) {
 }
 
 function getPercentile(data, n) {
+    if (data.length === 0) {
+        return 0;
+    }
     return data[Math.floor(data.length * n / 100)];
 }
