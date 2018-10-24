@@ -4,7 +4,6 @@ import run from './queue';
 import format from './format';
 import stats from './stats';
 import Chart from "./chart/chart";
-import NumberInput from './input';
 import ArrivalRatePicker from './distribution/ArrivalRatePicker';
 
 import styles from './index.css';
@@ -55,17 +54,10 @@ class Marbles extends React.Component {
         }, 50);
     }
 
-    setTaskSize(taskSize) {
-        this.setState({taskSize});
-    }
-
-    setInterval(interval) {
-        this.setState({interval});
-    }
-
     handleChangeDistribution(distribution) {
         this.setState({
             arrival: distribution,
+            taskSize: distribution.taskSize,
         });
     }
 
@@ -75,32 +67,15 @@ class Marbles extends React.Component {
 
         return <div>
             <ArrivalRatePicker onChangeDistribution={this.handleChangeDistribution}/>
-            <NumberInput label="Task size (ms)" value={this.state.taskSize}
-                         onChange={value => this.setTaskSize(value)}/>
-            <div>
-                <Meter label="Expected arrival rate" count={format(this.state.arrival.arrivalRate) + " tasks/s"}/>
-                <Meter label="Expected utilisation"
-                       count={format((this.state.taskSize / 10) * this.state.arrival.arrivalRate, 100) + "%"}/>
-            </div>
             <div className={styles['charts']}>
-                <div className={styles['charts-chart']}>
-                    <Chart title="Average latency" current={format(statsResult.averageLatency) + " ms"}
-                           points={[this.state.statsHistory.map((x) => x.averageLatency)]}
-                           maxHistory={MAX_HISTORY}/>
-                </div>
-                <div className={styles['charts-chart']}>
-                    <Chart title="Average response" current={format(statsResult.averageResponse) + " ms"}
-                           points={[this.state.statsHistory.map((x) => x.averageResponse)]}
-                           maxHistory={MAX_HISTORY}/>
-                </div>
                 <div className={styles['charts-chart']}>
                     <Chart title="Utilisation" current={format(statsResult.utilisation * 100, 100) + "%"}
                            points={[this.state.statsHistory.map((x) => x.utilisation)]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
-                    <Chart title="Queue length" current={statsResult.queueLength}
-                           points={[this.state.statsHistory.map((x) => x.queueLength)]}
+                    <Chart title="Average latency" current={format(statsResult.averageLatency) + " ms"}
+                           points={[this.state.statsHistory.map((x) => x.averageLatency)]}
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
@@ -109,7 +84,18 @@ class Marbles extends React.Component {
                            maxHistory={MAX_HISTORY}/>
                 </div>
                 <div className={styles['charts-chart']}>
-                    <Chart title="Percentiles" current={""}
+                    <Chart title="Queue length" current={statsResult.queueLength}
+                           points={[this.state.statsHistory.map((x) => x.queueLength)]}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Average response" current={format(statsResult.averageResponse) + " ms"}
+                           points={[this.state.statsHistory.map((x) => x.averageResponse)]}
+                           maxHistory={MAX_HISTORY}/>
+                </div>
+                <div className={styles['charts-chart']}>
+                    <Chart title="Percentiles"
+                           current={"p50:" + format(statsResult.p50) + " p75:" + format(statsResult.p75) + " p95:" + format(statsResult.p95) + " p99:" + format(statsResult.p99)}
                            points={[
                                this.state.statsHistory.map((x) => x.p99),
                                this.state.statsHistory.map((x) => x.p95),
@@ -121,12 +107,6 @@ class Marbles extends React.Component {
             </div>
         </div>
     }
-}
-
-function Meter({label, count}) {
-    return <p>
-        <span>{label}:</span> <span>{count}</span>
-    </p>;
 }
 
 ReactDOM.render(<Marbles/>, document.getElementById("index"));

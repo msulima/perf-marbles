@@ -1,6 +1,8 @@
 import React from "react";
 import DistributionPicker from "./DistributionPicker";
+import NumberInput from '../input';
 import ParametersPicker from "./ParametersPicker";
+import format from '../format';
 
 export default class ArrivalRatePicker extends React.Component {
 
@@ -10,9 +12,10 @@ export default class ArrivalRatePicker extends React.Component {
 
     static getInitial() {
         return {
-            distribution: "exp",
-            mean: 250,
-            beta: 200,
+            distribution: "uniform",
+            mean: 200,
+            beta: 150,
+            taskSize: 100,
         };
     }
 
@@ -22,6 +25,8 @@ export default class ArrivalRatePicker extends React.Component {
         this.handleChangeDistribution = this.handleChangeDistribution.bind(this);
         this.handleChangeMean = this.handleChangeMean.bind(this);
         this.handleChangeBeta = this.handleChangeBeta.bind(this);
+        this.handleChangeTaskSize = this.handleChangeTaskSize.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     handleChangeDistribution(distribution) {
@@ -42,26 +47,46 @@ export default class ArrivalRatePicker extends React.Component {
         });
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevState.distribution !== this.state.distribution || prevState.mean !== this.state.mean || prevState.beta !== this.state.beta) {
-            this.props.onChangeDistribution(mapToState(this.state));
-        }
+    handleChangeTaskSize(taskSize) {
+        this.setState({taskSize});
+    }
+
+    handleSubmit(ev) {
+        this.props.onChangeDistribution(mapToState(this.state));
+        ev.preventDefault();
     }
 
     render() {
-        return <fieldset>
-            <DistributionPicker checked={this.state.distribution} onChange={this.handleChangeDistribution}/>
-            <ParametersPicker mean={this.state.mean} beta={this.state.beta}
-                              betaEnabled={this.state.distribution === 'uniform'}
-                              onChangeMean={this.handleChangeMean} onChangeBeta={this.handleChangeBeta}/>
-        </fieldset>;
+        const arrivalRate = 1000 / this.state.mean;
+        return <form onSubmit={this.handleSubmit}>
+            <fieldset>
+                <DistributionPicker checked={this.state.distribution} onChange={this.handleChangeDistribution}/>
+                <ParametersPicker mean={this.state.mean} beta={this.state.beta}
+                                  betaEnabled={this.state.distribution === 'uniform'}
+                                  onChangeMean={this.handleChangeMean} onChangeBeta={this.handleChangeBeta}/>
+                <NumberInput label="Task size (ms)" value={this.state.taskSize} onChange={this.handleChangeTaskSize}/>
+                <div>
+                    <Meter label="Expected arrival rate" count={format(arrivalRate) + " tasks/s"}/>
+                    <Meter label="Expected utilisation"
+                           count={format((this.state.taskSize / 10) * arrivalRate, 100) + "%"}/>
+                </div>
+                <button>Apply</button>
+            </fieldset>
+        </form>;
     }
+}
+
+function Meter({label, count}) {
+    return <p>
+        <span>{label}:</span> <span>{count}</span>
+    </p>;
 }
 
 function mapToState(state) {
     return {
         generator: distribution(state.distribution).bind(null, state.mean, state.beta),
         arrivalRate: 1000 / state.mean,
+        taskSize: state.taskSize,
     };
 }
 

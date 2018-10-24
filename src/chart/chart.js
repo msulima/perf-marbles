@@ -4,9 +4,9 @@ import scale, {getScaledMaxValue} from './scale';
 import {axisLabels} from './axis';
 
 const HEIGHT = 400;
-const MARGIN_LEFT = 25;
+const MARGIN_LEFT = 10;
 const MARGIN_TOP = 10;
-const MARGIN_RIGHT = 50;
+const MARGIN_RIGHT = 60;
 const MARGIN_BOTTOM = 25;
 
 const LABEL_MARK_LENGTH = 5;
@@ -75,6 +75,7 @@ function drawYAxis(ctx, width, labels) {
         ctx.moveTo(positionX + LABEL_MARK_LENGTH, y);
         ctx.lineTo(positionX, y);
         ctx.stroke();
+        ctx.font = '18px sans';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillText(label.text, positionX + LABEL_MARK_LENGTH + 1, y);
@@ -84,8 +85,10 @@ function drawYAxis(ctx, width, labels) {
 function drawSeries(ctx, width, maxHistory, points, colour) {
     const leftFill = maxHistory - points.length;
     const style = ctx.strokeStyle;
+    const lineWidth = ctx.lineWidth;
     ctx.strokeStyle = colour;
     ctx.lineJoin = "round";
+    ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.beginPath();
     points.forEach((point, i) => {
@@ -99,6 +102,7 @@ function drawSeries(ctx, width, maxHistory, points, colour) {
         }
     });
     ctx.stroke();
+    ctx.lineWidth = lineWidth;
     ctx.strokeStyle = style;
 }
 
